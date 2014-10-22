@@ -21,13 +21,13 @@ int main(int argc, char **argv)
       goto exit_err;
    }
 
-   if( irc_serv_auth(&irc, "hunter2") < 0 )
+   if( irc_serv_auth(&irc, "6936mgdg") < 0 )
    {
       fprintf(stderr, "Couldn't auth with services.\n");
       goto exit_err;
    }
 
-   if ( irc_join_channel(&irc, "#sconesandcream") < 0 )
+   if ( irc_join_channel(&irc, "##cbottest") < 0 )
    {
       fprintf(stderr, "Couldn't join channel.\n");
       goto exit_err;

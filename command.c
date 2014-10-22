@@ -53,3 +53,11 @@ int irc_action(int s, const char *channel, const char *data) {
 int irc_privmsg(int s, const char *channel, const char *data) {
     return sck_sendf(s, "PRIVMSG %s :%s\r\n", channel, data);
 }
+
+/* irc_raw: For sending raw commands to the server. */
+int irc_raw(int s, const char *rawdata) {
+    char *frmt = strdup(rawdata);
+    strcat(frmt, "%s");
+    frmt[512] = '\0';
+    return sck_sendf(s, frmt, "\r\n");
+}

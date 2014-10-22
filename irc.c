@@ -20,7 +20,8 @@ int irc_connect(irc_t *irc, const char *server, const char *port) {
 }
 
 int irc_login(irc_t *irc, const char *nick) {
-
+    irc->nick = (char *) malloc( sizeof(char) * strlen(nick));
+    strcpy(irc->nick, nick);
     return irc_reg(irc->s, nick, "circle", "C IRC Robot");
 }
 
