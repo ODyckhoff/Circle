@@ -3,6 +3,8 @@ Circle
 
 An IRC robot written in C. Primarily built to interact with IRCaD, but will be open for external usage too.
 
+So called because C + IRC = CIRC and it's only 2 letters away from Circle. Plus also "circle" is a rather poetic way to describe the infinite loop at the heart of it, that keeps everything ticking over until a failure condition is encountered.
+
 Workings
 --------
 
@@ -13,8 +15,8 @@ Running
 -------
 
 ```shell
-gcc -o run *.c
-./run
+gcc -o circle *.c
+./circle
 ```
 
 
