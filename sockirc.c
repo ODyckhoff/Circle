@@ -14,5 +14,5 @@
 #include <netdb.h>
 
 /* Local headers. */
-#include "socket.h"
+#include "sockirc.h"
 
