@@ -196,6 +196,11 @@ int bot_command(irc_t *irc, char *irc_nick, char *irc_chan, char *msg) {
         irc_privmsg(irc->s, irc_chan, "~^~^`---'~^~^~^`---'~^~^~^`---'~^~^~^`---'~^~^~^`---'~^~^~");
     }
     
+    else if ( strcmp(command, "trigger") ==0) {
+        irc_privmsg(irc->s, irc_chan, "Stop triggering me, shitlord");
+        
+    }
+    
     else if ( strcmp(command, "circler") == 0) {
         irc_privmsg(irc->s, irc_chan, "            .....");
         irc_privmsg(irc->s, irc_chan, "        _d^^^^^^^^^b_");
