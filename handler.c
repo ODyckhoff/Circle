@@ -7,6 +7,7 @@
 
 /* Handler required headers. */
 #include <time.h>
+#include <unistd.h>
 
 /* Local Headers. */
 #include "irc.h"
@@ -55,10 +56,12 @@ int irc_parse_action(irc_t *irc) {
     char irc_nick[128];
     char irc_msg[512];
     char irc_chan[128];
+    char *buf;
     char *ptr;
     int privmsg = 0;
 
-    fprintf(irc->file, "SERVBUF = %s\n", irc->servbuf);
+    printf("SERVBUF: %s\n", irc->servbuf);
+
     if ( strncmp(irc->servbuf, "PING :", 6) == 0 ) {
         return irc_pong(irc->s, &irc->servbuf[6]);
     }
@@ -76,13 +79,14 @@ int irc_parse_action(irc_t *irc) {
         *irc_nick = '\0';
         *irc_msg  = '\0';
         *irc_chan = '\0';
+        buf = strdup(irc->servbuf);
 
         /* Check for non-message string. */
-        if ( strchr(irc->servbuf, 1) != NULL )
+        if ( strchr(buf, 1) != NULL )
             return 0;
    
-        if ( irc->servbuf[0] == ':') {
-            ptr = strtok(irc->servbuf, "!");
+        if ( buf[0] == ':') {
+            ptr = strsep(&buf, "!");
             if ( ptr == NULL ) {
                 printf("ptr == NULL\n");
                 return 0;
@@ -92,7 +96,7 @@ int irc_parse_action(irc_t *irc) {
                 irc_nick[127] = '\0';
             }
 
-            while ( (ptr = strtok(NULL, " ")) != NULL ) {
+            while ( (ptr = strsep(&buf, " ")) != NULL ) {
                 if ( strcmp(ptr, "PRIVMSG") == 0 ) {
                     privmsg = 1;
                     break;
@@ -100,7 +104,7 @@ int irc_parse_action(irc_t *irc) {
             }
 
             if ( privmsg ) {
-                if ( (ptr = strtok(NULL, " ")) != NULL) {
+                if ( (ptr = strsep(&buf, " ")) != NULL) {
                     strncpy(irc_chan, ptr, 127);
                     irc_chan[127] = '\0';
 
@@ -111,8 +115,8 @@ int irc_parse_action(irc_t *irc) {
                         irc_chan[127] = '\0';
                     }
                 }
-                if ( (ptr = strtok(NULL, ":")) != NULL) {
-                    strncpy(irc_msg, ptr, 511);
+                if ( (ptr = strsep(&buf, ":")) != NULL) {
+                    strncpy(irc_msg, buf, 511);
                     irc_msg[511] = '\0';
                 }
             }
@@ -138,14 +142,19 @@ int irc_reply_message(irc_t *irc, char *irc_nick, char *irc_chan, char *msg) {
 int bot_command(irc_t *irc, char *irc_nick, char *irc_chan, char *msg) {
     /* Bot commands are all internal, and are prefixed with '&'. */
 
-    char *command;
-    char *arg;
+    char *command = (char *) malloc( sizeof(char) * strlen(msg) );
+    char *arg     = (char *) malloc( sizeof(char) * strlen(msg) );
+
     // Gets command
-    command = strtok(&msg[1], " ");
-    arg = strtok(NULL, "");
-    if ( arg != NULL )
+    msg = msg + 1;
+    command = strsep(&msg, " ");
+    arg = msg;
+
+    printf("command = %s\n", command);
+    printf("arg = %s\n", arg);
+    /*if ( arg != NULL )
         while ( *arg == ' ' )
-            arg++;
+            arg++;*/
 
     if ( command == NULL )
         return 0;
@@ -186,6 +195,26 @@ int bot_command(irc_t *irc, char *irc_nick, char *irc_chan, char *msg) {
         irc_privmsg(irc->s, irc_chan, "   (` =~~/    (` =~~/    (` =~~/    (` =~~/    (` =~~/    ");
         irc_privmsg(irc->s, irc_chan, "~^~^`---'~^~^~^`---'~^~^~^`---'~^~^~^`---'~^~^~^`---'~^~^~");
     }
+    
+    else if ( strcmp(command, "circler") == 0) {
+        irc_privmsg(irc->s, irc_chan, "            .....");
+        irc_privmsg(irc->s, irc_chan, "        _d^^^^^^^^^b_");
+        irc_privmsg(irc->s, irc_chan, "     .d''           ``b.");
+        irc_privmsg(irc->s, irc_chan, "   .p'     CIRCLER     `q.");
+        irc_privmsg(irc->s, irc_chan, "  .d'      =======      `b.");
+            sleep(1);
+        irc_privmsg(irc->s, irc_chan, " .d'   IRC robot in C.   `b.");
+        irc_privmsg(irc->s, irc_chan, " ::                       ::");
+        irc_privmsg(irc->s, irc_chan, " ::  ...................  ::");
+        irc_privmsg(irc->s, irc_chan, " ::                       ::");
+        irc_privmsg(irc->s, irc_chan, " `p. owen.dyckhoff@gmail .q'");
+            sleep(1);
+        irc_privmsg(irc->s, irc_chan, "  `p.  Owen R Dyckhoff  .q'");
+        irc_privmsg(irc->s, irc_chan, "   `b.                 .d'");
+        irc_privmsg(irc->s, irc_chan, "     `q..          ..p'");
+        irc_privmsg(irc->s, irc_chan, "        ^q........p^");
+        irc_privmsg(irc->s, irc_chan, "            ''''");
+    }
 
     else if ( strcmp(command, "VERSION") == 0) {
         if(irc_privmsg(irc->s, irc_chan, "0.2") < 0)
@@ -204,10 +233,12 @@ int general_parse(irc_t* irc, char *irc_nick, char *irc_chan, char *msg) {
      *     and 'msg' can be used directly.
      */
 
-    fprintf(irc->file, "MSG = %s\n", msg);
     if ( strcmp(msg, "VERSION") == 0) {
         if(irc_privmsg(irc->s, irc_chan, "0.2") < 0)
             return -1;
+    }
+    else if ( strcmp(msg, "Fuck off, circler") == 0) {
+        irc_quit(irc->s, "Help! I'm being oppressed!");
     }
 
     /* if( irc->handler(irc, irc_nick, irc_chan, irc_msg) < 0)
