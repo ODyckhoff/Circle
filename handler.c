@@ -13,6 +13,7 @@
 #include "irc.h"
 #include "handler.h"
 #include "command.h"
+#include "util/str.h"
 
 int irc_handle_data(irc_t *irc) {
     char tempbuffer[512];
@@ -144,6 +145,7 @@ int bot_command(irc_t *irc, char *irc_nick, char *irc_chan, char *msg) {
 
     char *command = (char *) malloc( sizeof(char) * strlen(msg) );
     char *arg     = (char *) malloc( sizeof(char) * strlen(msg) );
+    char out[254];
 
     // Gets command
     msg = msg + 1;
@@ -152,9 +154,8 @@ int bot_command(irc_t *irc, char *irc_nick, char *irc_chan, char *msg) {
 
     printf("command = %s\n", command);
     printf("arg = %s\n", arg);
-    /*if ( arg != NULL )
-        while ( *arg == ' ' )
-            arg++;*/
+
+    arg = strrep(arg, "\\x01", "\x01");
 
     if ( command == NULL )
         return 0;
@@ -165,7 +166,7 @@ int bot_command(irc_t *irc, char *irc_nick, char *irc_chan, char *msg) {
     }
 
     else if ( strcmp(command, "poke") == 0) {
-        char out[254] = "pokes ";
+        strcpy(out, "pokes ");
         if(arg != NULL)
             strcat(out, arg);
         else
@@ -180,6 +181,18 @@ int bot_command(irc_t *irc, char *irc_nick, char *irc_chan, char *msg) {
     else if ( strcmp(command, "raw") == 0 ) {
         if( strncmp(irc_nick, "ijz", 3) == 0) {
             if( irc_raw(irc->s, arg) < 0 )
+                return -1;
+        }
+        else {
+            if(irc_privmsg(irc->s, irc_chan, "You don't have permission to use that command") < 0)
+                return -1;
+            return 0;
+        }
+    }
+
+    else if ( strcmp(command, "action") == 0 ) {
+        if( strncmp(irc_nick, "ijz", 3) == 0) {
+            if( irc_action(irc->s, irc_chan, arg) < 0 )
                 return -1;
         }
         else {
@@ -227,8 +240,14 @@ int bot_command(irc_t *irc, char *irc_nick, char *irc_chan, char *msg) {
     }
 
     /* Else if ... and so on... */    
+
+    else {
+        sprintf(out, "'&%s': command not found.", command);
+        
+        irc_privmsg(irc->s, irc_chan, out);
+    }
    
-   return 0;
+    return 0;
 }
 
 int general_parse(irc_t* irc, char *irc_nick, char *irc_chan, char *msg) {
