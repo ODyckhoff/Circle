@@ -15,6 +15,19 @@
 #include "command.h"
 #include "util/str.h"
 
+int is_not_a_dick(char *nick) {
+    #define ARRLEN 3
+
+    int i;
+    char *dicks[ARRLEN] = {"Teaboy", "Blankzinga", "testdick"};
+
+    for(i = 0; i < ARRLEN; i++) {
+        if(strcmp(nick, dicks[i]) == 0)
+            return 0;
+    }
+    return 1;
+}
+
 int irc_handle_data(irc_t *irc) {
     char tempbuffer[512];
     int rc, i;
@@ -214,24 +227,29 @@ int bot_command(irc_t *irc, char *irc_nick, char *irc_chan, char *msg) {
         
     }
     
-    else if ( strcmp(command, "circler") == 0) {
-        irc_privmsg(irc->s, irc_chan, "            .....");
-        irc_privmsg(irc->s, irc_chan, "        _d^^^^^^^^^b_");
-        irc_privmsg(irc->s, irc_chan, "     .d''           ``b.");
-        irc_privmsg(irc->s, irc_chan, "   .p'     CIRCLER     `q.");
-        irc_privmsg(irc->s, irc_chan, "  .d'      =======      `b.");
-            sleep(1);
-        irc_privmsg(irc->s, irc_chan, " .d'   IRC robot in C.   `b.");
-        irc_privmsg(irc->s, irc_chan, " ::                       ::");
-        irc_privmsg(irc->s, irc_chan, " ::  ...................  ::");
-        irc_privmsg(irc->s, irc_chan, " ::                       ::");
-        irc_privmsg(irc->s, irc_chan, " `p. owen.dyckhoff@gmail .q'");
-            sleep(1);
-        irc_privmsg(irc->s, irc_chan, "  `p.  Owen R Dyckhoff  .q'");
-        irc_privmsg(irc->s, irc_chan, "   `b.                 .d'");
-        irc_privmsg(irc->s, irc_chan, "     `q..          ..p'");
-        irc_privmsg(irc->s, irc_chan, "        ^q........p^");
-        irc_privmsg(irc->s, irc_chan, "            ''''");
+    else if ( strcmp(command, "circler") == 0 ) {
+        if( is_not_a_dick(irc_nick) ) {
+            irc_privmsg(irc->s, irc_chan, "            .....");
+            irc_privmsg(irc->s, irc_chan, "        _d^^^^^^^^^b_");
+            irc_privmsg(irc->s, irc_chan, "     .d''           ``b.");
+            irc_privmsg(irc->s, irc_chan, "   .p'     CIRCLER     `q.");
+            irc_privmsg(irc->s, irc_chan, "  .d'      =======      `b.");
+                sleep(1);
+            irc_privmsg(irc->s, irc_chan, " .d'   IRC robot in C.   `b.");
+            irc_privmsg(irc->s, irc_chan, " ::                       ::");
+            irc_privmsg(irc->s, irc_chan, " ::  ...................  ::");
+            irc_privmsg(irc->s, irc_chan, " ::                       ::");
+            irc_privmsg(irc->s, irc_chan, " `p. owen.dyckhoff@gmail .q'");
+                sleep(1);
+            irc_privmsg(irc->s, irc_chan, "  `p.  Owen R Dyckhoff  .q'");
+            irc_privmsg(irc->s, irc_chan, "   `b.                 .d'");
+            irc_privmsg(irc->s, irc_chan, "     `q..          ..p'");
+            irc_privmsg(irc->s, irc_chan, "        ^q........p^");
+            irc_privmsg(irc->s, irc_chan, "            ''''");
+        }
+        else {
+            irc_privmsg(irc->s, irc_chan, "Sorry, you're in the list of people who are dicks.");
+        }
     }
 
     else if ( strcmp(command, "VERSION") == 0) {
