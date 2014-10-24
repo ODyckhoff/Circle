@@ -16,10 +16,10 @@
 #include "util/str.h"
 
 int is_not_a_dick(char *nick) {
-    #define ARRLEN 3
+    #define ARRLEN 3 
 
     int i;
-    char *dicks[ARRLEN] = {"Teaboy", "Blankzinga", "testdick"};
+    char *dicks[ARRLEN] = {"Teaboy", "Blankzinga", "Ballbag"};
 
     for(i = 0; i < ARRLEN; i++) {
         if(strcmp(nick, dicks[i]) == 0)
