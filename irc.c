@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "irc.h"
 #include "sockirc.h"
@@ -10,6 +11,7 @@
 #include "handler.h"
 
 int irc_connect(irc_t *irc, const char *server, const char *port) {
+    fprintf(stderr, "tum tee tum... %s\n", server);
     if( (irc->s = get_socket(server, port)) < 0 ) {
         return -1;
     }
@@ -20,7 +22,7 @@ int irc_connect(irc_t *irc, const char *server, const char *port) {
 }
 
 int irc_login(irc_t *irc, const char *nick) {
-    irc->nick = (char *) malloc( sizeof(char) * strlen(nick));
+    irc->nick = malloc( strlen(nick) + 1 );
     strcpy(irc->nick, nick);
     return irc_reg(irc->s, nick, "circle", "C IRC Robot");
 }

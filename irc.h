@@ -6,10 +6,19 @@
 typedef struct irc_t {
     int s;
     FILE *file;
-    char channel[256];
+
+    char *port;
+    char *server;
+    char *channel;
     char *nick;
+    char *nicksrvauth;
+    
     char servbuf[512];
     int bufptr;
+
+    int hndlr_count;
+    int ( *hndlr_list[5] )( struct irc_t *, char *, char *, char * );
+    
 } irc_t;
 
 int irc_connect(irc_t *irc, const char *server, const char *port);

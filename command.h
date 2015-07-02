@@ -10,5 +10,6 @@ int irc_quit(int s, const char *quit_msg);
 int irc_topic(int s, const char *channel, const char *data);
 int irc_action(int s, const char *channel, const char *data);
 int irc_privmsg(int s, const char *channel, const char *data);
+int irc_raw(int s, const char *rawdata);
 
 #endif /* COMMAND_H */

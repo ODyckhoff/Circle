@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <errno.h>
 
 /* Socket headers. */
 #include <sys/types.h>
@@ -39,8 +40,9 @@ int get_socket(const char* host, const char* port) {
         error = 1;
     }
 
-    if ( ! error && connect(s, res->ai_addr, res->ai_addrlen) < 0 ) {
-        fprintf(stderr, "Couldn't connect.\n");
+    if ( ! error && ( error = connect(s, res->ai_addr, res->ai_addrlen) ) < 0 ) {
+        fprintf(stderr, "Couldn't connect. Code: %d, Msg: %s\n", errno, strerror( errno ));
+        fprintf(stderr, "    debug output:\n        %s:%s\n", host, port);
         error = 1;
     }
 
@@ -72,12 +74,12 @@ int sck_sendf(int s, const char *fmt, ...) {
     va_list args;
 
     if (strlen(fmt) != 0 ) {
-        // Format the data
+        /* Format the data */
         va_start(args, fmt);
         send_len = vsnprintf(send_buf, sizeof (send_buf), fmt, args);
         va_end(args);
 
-        // Clamp the chunk
+        /* Clamp the chunk */
         if (send_len > 512) 
             send_len = 512;
    

@@ -13,6 +13,7 @@
 #include "irc.h"
 #include "handler.h"
 #include "command.h"
+#include "sockirc.h"
 #include "util/str.h"
 
 int is_not_a_dick(char *nick) {
@@ -160,7 +161,7 @@ int bot_command(irc_t *irc, char *irc_nick, char *irc_chan, char *msg) {
     char *arg     = (char *) malloc( sizeof(char) * strlen(msg) );
     char out[254];
 
-    // Gets command
+    /* Gets command */
     msg = msg + 1;
     command = strsep(&msg, " ");
     arg = msg;
@@ -283,10 +284,8 @@ int general_parse(irc_t* irc, char *irc_nick, char *irc_chan, char *msg) {
         irc_quit(irc->s, "Help! I'm being oppressed!");
     }
 
-    /* if( irc->handler(irc, irc_nick, irc_chan, irc_msg) < 0)
-     *     return -1;
-     */
-
+    callhndlr(irc, irc_nick, irc_chan, msg);
+     
     return 0;
 }
 
@@ -294,10 +293,36 @@ int irc_log_message(irc_t *irc, const char *nick, const char *chan, const char *
     char timestring[128];
     time_t curtime;
     time(&curtime);
-    strftime(timestring, 127, "%F - %H:%M:%S", localtime(&curtime));
+    strftime(timestring, 127, "%Y-%m-%d - %H:%M:%S", localtime(&curtime));
     timestring[127] = '\0';
 
     fprintf(irc->file, "%s - [%s] <%s> %s\n", chan, timestring, nick, message);
     fflush(irc->file);
+
+    return 0;
+}
+
+void addhndlr( irc_t *irc, int ( *hndlf )( irc_t*,char*,char*,char* ) ) {
+    rmhndlr( irc, hndlf );
+    irc->hndlr_list[ irc->hndlr_count++ ] = hndlf;
+}
+
+void rmhndlr( irc_t *irc, int ( *hndlf )( irc_t*,char*,char*,char* ) ) {
+    unsigned i;
+
+    for( i = 0; i < irc->hndlr_count; ++i ) {
+        if( irc->hndlr_list[ i ] == hndlf ) {
+            irc->hndlr_count--;
+            irc->hndlr_list[ i ] = 
+            irc->hndlr_list[ irc->hndlr_count ];
+        }
+    }
+}
+
+void callhndlr( irc_t *irc, char *nick, char *chan, char *msg ) {
+    unsigned i;
+    for( i = 0; i < irc->hndlr_count; ++i )  {
+        irc->hndlr_list[ i ]( irc, nick, chan, msg );
+    }
 }
 
